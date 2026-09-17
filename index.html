@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E7F2FA">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>いろどり標本室</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E7F2FA;--panel:#FDFEFF;--ink:#33475C;--soft:#7B90A5;--line:#CFE0EC;
+  --ai:#3E8FD8;--pin:#C8A44F;--danger:#B25E56;
+  --shadow:0 8px 26px rgba(62,110,160,.10);
+  --serif:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+  --sans:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(62,143,216,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(62,143,216,.045) 1px,transparent 1px);
+  background-size:26px 26px}
+body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(42% 20% at 14% 4%,rgba(255,255,255,.9),transparent 70%),radial-gradient(34% 16% at 86% 10%,rgba(255,255,255,.75),transparent 70%),radial-gradient(52% 24% at 50% 102%,rgba(255,255,255,.55),transparent 70%)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{border:0;cursor:pointer;background:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid rgba(62,143,216,.35);outline-offset:2px}
+input[type=text],textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px 12px;min-height:44px}
+textarea{resize:vertical;min-height:80px}
+#app{width:min(100%,640px);min-height:100vh;min-height:100dvh;margin:0 auto;position:relative;z-index:1;background:rgba(250,253,255,.55);box-shadow:0 0 50px rgba(46,52,80,.06)}
+.topbar{position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:10px;padding:12px 14px 9px;background:rgba(231,242,250,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{flex:1;min-width:0;text-align:center}
+.brand h1{font-family:var(--serif);font-size:20px;letter-spacing:.14em;font-weight:600}
+.brand p{font-size:11.5px;color:var(--soft);letter-spacing:.06em}
+.round-btn{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);border-radius:13px;background:var(--panel);font-size:18px;flex:none;box-shadow:0 2px 8px rgba(46,52,80,.05)}
+.round-btn:active,.primary:active,.ghost:active,.danger:active{transform:scale(.97)}
+main{padding:15px 13px calc(96px + env(safe-area-inset-bottom))}
+.view{display:none}.view.active{display:block;animation:arrive .2s ease}
+@keyframes arrive{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.view.active{animation:none}}
+.head{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:2px 2px 12px}
+.head h2{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:.08em}
+.head p{font-size:12.5px;color:var(--soft)}
+.primary,.ghost,.danger{min-height:42px;border-radius:999px;padding:8px 16px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.primary{background:var(--ai);color:#fff;box-shadow:0 4px 12px rgba(62,143,216,.22)}
+.ghost{background:var(--panel);border:1px solid var(--line)}
+.danger{background:#fff;border:1px solid #D8B6B2;color:var(--danger)}
+.small{min-height:35px;padding:5px 12px;font-size:13px}
+.wide{width:100%}
+.chips{display:flex;gap:7px;overflow-x:auto;padding:1px 1px 10px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chips button{white-space:nowrap;border:1px solid var(--line);background:rgba(255,255,255,.75);border-radius:999px;padding:7px 14px;font-size:13.5px;color:var(--soft)}
+.chips button.active{background:var(--ai);border-color:var(--ai);color:#fff;font-weight:600}
+.note{font-size:12px;color:var(--soft);margin:0 3px 10px}
+/* 標本カード */
+.pal{border-radius:18px;border:1px solid;padding:13px 13px 11px;margin-bottom:13px;box-shadow:var(--shadow);position:relative}
+.pal .pin{position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#E8CE8F,var(--pin));box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.strata{display:flex;height:42px;border-radius:11px;overflow:hidden;border:1px solid rgba(0,0,0,.08)}
+.strata i{display:block;height:100%}
+.pal h3{font-family:var(--serif);font-size:17px;margin:9px 2px 0;letter-spacing:.05em}
+.pal .mood{font-size:12px;opacity:.75;margin:0 2px 8px}
+.prow{width:100%;display:flex;align-items:center;gap:9px;padding:6px 4px;border-radius:10px;text-align:left}
+.prow:active{background:rgba(0,0,0,.05)}
+.prow .sw{width:30px;height:30px;border-radius:9px;flex:none;border:1px solid rgba(0,0,0,.1)}
+.prow .role{font-size:12.5px;width:3.6em;flex:none;opacity:.8}
+.prow code{font-size:13px;font-family:inherit;letter-spacing:.02em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pal-foot{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+.pal-foot .tag{font-size:11px;border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:2px 9px;opacity:.75}
+.pal-foot .sp{flex:1}
+.pal-btn{min-height:33px;border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:600;border:1px solid rgba(0,0,0,.16);background:rgba(255,255,255,.35)}
+.ratio-note{font-size:11px;opacity:.6;margin-top:3px;text-align:right}
+/* 実験室 */
+.case{background:linear-gradient(165deg,#FFFFFF,#E9F3FB);border:1px solid var(--line);border-radius:20px;padding:10px;box-shadow:var(--shadow);display:grid;place-items:center}
+.case svg{width:min(58%,190px);height:auto;display:block}
+.panelbox{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px;margin-top:12px;box-shadow:var(--shadow)}
+.panelbox h3{font-family:var(--serif);font-size:16px;margin-bottom:8px;letter-spacing:.05em}
+.slotrow{display:flex;align-items:center;gap:8px;padding:6px 4px;border-radius:12px;border:1.5px solid transparent}
+.slotrow.sel{border-color:var(--ai);background:rgba(62,143,216,.1)}
+.selbadge{font-size:10px;font-weight:700;background:var(--ai);color:#fff;border-radius:999px;padding:2px 8px;flex:none;letter-spacing:.05em}
+.slotrow .pick{width:38px;height:38px;border-radius:11px;border:1px solid rgba(0,0,0,.12);flex:none}
+.slotrow .nm{width:4.2em;font-size:13.5px;font-weight:600;flex:none}
+.slotrow input[type=color]{width:40px;height:36px;border:1px solid var(--line);border-radius:10px;padding:1px;background:#fff;flex:none}
+.slotrow input.hex{min-height:36px;padding:5px 9px;font-size:13.5px;border-radius:10px;flex:1;min-width:0}
+.lock{width:38px;height:36px;border:1px solid var(--line);border-radius:10px;background:#fff;display:grid;place-items:center;font-size:15px;flex:none}
+.lock.on{background:#FBF2D8;border-color:#DFC57E}
+.var-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.var-cell{border-radius:13px;border:1px solid rgba(0,0,0,.1);padding:8px 6px;text-align:center;min-height:64px;display:flex;flex-direction:column;justify-content:center;gap:1px}
+.var-cell b{font-size:11.5px;font-weight:600}
+.var-cell code{font-size:10.5px;opacity:.85}
+.ext-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.ext-row button{width:42px;height:42px;border-radius:12px;border:1px solid rgba(0,0,0,.12)}
+.refimg{margin-top:9px;border:1px dashed var(--line);border-radius:14px;overflow:hidden;background:#fff;display:grid;place-items:center;min-height:70px;color:var(--soft);font-size:12.5px}
+.refimg img{width:100%;max-height:230px;object-fit:contain;display:block}
+.plan-strip{display:flex;flex-direction:column;gap:8px}
+.plan-card{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 10px}
+.plan-card .sws{display:flex;gap:3px;flex:none}
+.plan-card .sws i{width:15px;height:26px;border-radius:5px;border:1px solid rgba(0,0,0,.09);display:block}
+.plan-card strong{flex:1;min-width:0;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 発想 */
+.cat-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px 12px;margin-bottom:10px;box-shadow:0 3px 10px rgba(46,52,80,.05)}
+.cat-top{display:flex;align-items:center;gap:8px}
+.cat-top .cl{font-family:var(--serif);font-weight:600;font-size:15px;flex:1;letter-spacing:.05em}
+.cat-val{width:100%;text-align:left;margin-top:7px;border:1px dashed rgba(62,143,216,.4);background:rgba(62,143,216,.05);border-radius:12px;padding:9px 12px;font-size:15px;min-height:44px}
+.cat-val span{color:var(--soft);font-size:13px}
+.addbtn{width:38px;height:36px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:16px;flex:none}
+.result-box{background:linear-gradient(150deg,#FFFFFF,#EDF5FB);border:1px solid var(--ai);border-radius:18px;padding:13px;margin:12px 0;box-shadow:var(--shadow)}
+.result-box .sent{font-family:var(--serif);font-size:17px;letter-spacing:.04em;line-height:1.8;word-break:break-word}
+/* 保存箱 */
+.box-sec{margin-bottom:18px}
+.box-sec h3{font-family:var(--serif);font-size:16.5px;letter-spacing:.06em;margin:0 2px 9px}
+.box-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:11px 12px;margin-bottom:10px;box-shadow:0 3px 10px rgba(46,52,80,.05)}
+.box-card .bandmini{display:flex;height:22px;border-radius:7px;overflow:hidden;border:1px solid rgba(0,0,0,.08);margin-bottom:7px}
+.box-card .bandmini i{display:block;height:100%;flex:1}
+.box-card h4{font-size:14.5px;font-family:var(--serif);letter-spacing:.04em}
+.box-card .memo{font-size:12.5px;color:var(--soft);margin:2px 0 8px;white-space:pre-wrap;word-break:break-word}
+.box-actions{display:flex;gap:7px;flex-wrap:wrap}
+.empty{text-align:center;border:1px dashed var(--line);border-radius:16px;padding:26px 14px;color:var(--soft);background:rgba(255,255,255,.5);font-size:13.5px}
+/* タブバー・モーダル・トースト */
+.tabbar{position:fixed;z-index:20;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,640px);display:grid;grid-template-columns:repeat(4,1fr);padding:7px 10px calc(7px + env(safe-area-inset-bottom));background:rgba(253,254,255,.95);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+.tabbar button{min-height:52px;border-radius:14px;color:var(--soft);font-size:11.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.tabbar button b{font-size:20px;line-height:1.1}
+.tabbar button.active{background:rgba(62,143,216,.1);color:var(--ai);font-weight:700}
+.modal-wrap{position:fixed;z-index:50;inset:0;display:none;align-items:flex-end;justify-content:center;background:rgba(40,44,60,.4);padding-top:26px}
+.modal-wrap.open{display:flex}
+.modal{width:min(100%,640px);max-height:90vh;max-height:90dvh;overflow:auto;background:#F7FBFE;border-radius:24px 24px 0 0;padding:12px 15px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -14px 44px rgba(30,34,52,.2)}
+.handle{width:44px;height:5px;border-radius:9px;background:#CFCCC0;margin:0 auto 10px}
+.modal h2{font-family:var(--serif);font-size:18px;margin-bottom:10px;letter-spacing:.05em}
+.field{margin-top:11px}.field label{display:block;font-size:13px;font-weight:600;margin:0 2px 5px}
+.actions{display:flex;gap:8px;margin-top:15px}.actions>*{flex:1}
+.msec{background:#fff;border:1px solid var(--line);border-radius:15px;padding:12px;margin-top:11px}
+.msec h3{font-family:var(--serif);font-size:15.5px;margin-bottom:6px}
+.msec p{font-size:12.5px;color:var(--soft);margin-bottom:8px}
+.toast{position:fixed;z-index:80;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translate(-50%,12px);opacity:0;pointer-events:none;transition:.2s;width:min(calc(100% - 32px),460px);background:#343A4E;color:#fff;border-radius:15px;padding:11px 14px;text-align:center;font-size:14px;box-shadow:0 10px 28px rgba(24,28,44,.3)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.banner{display:none;margin:8px 13px 0;padding:9px 12px;border-radius:13px;background:#FBEFD3;color:#6E5A2B;font-size:12px;border:1px solid #E5CC8E}
+.banner.show{display:block}
+.today-label{font-size:13px;font-weight:700;color:var(--ai);margin:4px 3px 7px;letter-spacing:.08em}
+.hint-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.hint-chips button{border:1px dashed var(--ai);background:rgba(62,143,216,.06);border-radius:999px;padding:6px 12px;font-size:13px;text-align:left}
+.tagpick button.addtag{border-style:dashed;color:var(--ai);background:rgba(62,143,216,.05)}
+.ref-thumbs{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.ref-thumb{position:relative;width:64px;height:64px;border-radius:12px;overflow:hidden;border:2px solid var(--line);background:#fff;padding:0}
+.ref-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.ref-thumb.on{border-color:var(--ai);box-shadow:0 0 0 2px rgba(62,143,216,.25)}
+.tagpick{display:flex;gap:6px;flex-wrap:wrap}
+.tagpick button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;color:var(--soft)}
+.tagpick button.on{background:var(--ai);border-color:var(--ai);color:#fff;font-weight:600}
+.rolerow{display:flex;align-items:center;gap:8px;margin-top:8px}
+.rolerow .rl{width:3.6em;font-size:13px;font-weight:600;flex:none}
+.rolerow input[type=color]{width:44px;height:38px;border:1px solid var(--line);border-radius:10px;padding:1px;background:#fff;flex:none}
+.rolerow input.hex{min-height:38px;padding:5px 9px;font-size:13.5px;border-radius:10px;flex:1;min-width:0}
+@media(min-width:520px){.var-grid{grid-template-columns:repeat(4,1fr)}.chips{flex-wrap:wrap;overflow-x:visible}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="round-btn" onclick="rerollUnlocked()" aria-label="発想を引き直す">🎲</button>
+    <div class="brand"><h1>いろどり標本室</h1><p>そらひ謹製、色と発想の観察部屋</p></div>
+    <button class="round-btn" onclick="openSettings()" aria-label="保存とバックアップ">⚙️</button>
+  </header>
+  <div id="storageBanner" class="banner">この環境では保存箱を開けないみたい。バックアップをこまめに書き出してね。</div>
+  <main>
+
+    <section class="view active" id="view-spec">
+      <div class="head"><div><h2>🗂 配色標本室</h2><p>雰囲気で選ぶ、役割つきの配色棚。</p></div><button class="primary small" onclick="openPalEditor(null)">＋ 自作標本</button></div>
+      <div class="chips" id="modeChips">
+        <button data-m="hex" class="active" onclick="setMode('hex')">HEX</button>
+        <button data-m="rgb" onclick="setMode('rgb')">RGB</button>
+        <button data-m="hsl" onclick="setMode('hsl')">HSL</button>
+      </div>
+      <div class="chips" id="tagChips"></div>
+      <p class="note">色の行をタップすると、表示中の形式でコピーできるよ。</p>
+      <div id="palList"></div>
+    </section>
+
+    <section class="view" id="view-lab">
+      <div class="head"><div><h2>🧪 キャラ配色実験室</h2><p>部位に色を置いて、標本人形で眺める。</p></div>
+        <button class="ghost small" onclick="shuffleLab()">🎲 ロック以外</button></div>
+      <div class="case" id="dollCase"></div>
+      <div class="panelbox">
+        <h3>部位の色</h3>
+        <p class="note">左の色チップをタップ＝その部位が「基準」になるよ。🔒は引き直し・適用から守る印。</p>
+        <div id="slotList"></div>
+        <div class="actions"><button class="ghost" onclick="resetLab()">部位を初期化</button><button class="primary" onclick="openSavePlan()">⭐ この案を保存</button></div>
+      </div>
+      <div class="panelbox">
+        <h3 id="varTitle">色の枝分かれ</h3>
+        <p class="note">基準の部位の色から派生。セルをタップで基準部位に適用（もう一度基準を選び直せば重ね掛けもできる）。</p>
+        <div class="var-grid" id="varGrid"></div>
+      </div>
+      <div class="panelbox">
+        <h3>参考画像と色抽出</h3>
+        <p class="note">①画像を足す（4枚まで） → ②サムネをタップで切り替え → ③選んだ画像の代表色が下に並ぶ → ④「基準」の部位を決めて抽出色をタップで流し込み。画像はこの端末の外に出ないよ。</p>
+        <input type="file" id="refInput" accept="image/*" hidden onchange="onRefImage(event)">
+        <div class="actions" style="margin-top:0"><button class="ghost" onclick="document.getElementById('refInput').click()">🖼 画像を足す</button><button class="ghost" onclick="clearRef()">この画像を外す</button></div>
+        <div class="ref-thumbs" id="refThumbs"></div>
+        <div class="refimg" id="refBox">まだ画像はないよ</div>
+        <div class="ext-row" id="extRow"></div>
+        <div class="actions" id="extActions" style="display:none;margin-top:9px"><button class="primary" onclick="saveExtPalette()">🗂 抽出色から自作標本をつくる</button></div>
+        <p class="note" id="extHint" style="display:none;margin-top:6px">抽出色をタップ → 基準の部位に入るよ（🔒中の部位ならコピーになる）。</p>
+      </div>
+      <div class="panelbox">
+        <h3>配色比較盤</h3>
+        <p class="note">保存した案を並べて見比べる場所。読み込みで人形に反映。</p>
+        <div class="plan-strip" id="planStrip"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-idea">
+      <div class="head"><div><h2>💡 デザイン発想</h2><p>掛け合わせて、まだ無い案を拾う。</p></div></div>
+      <div class="actions" style="margin:0 0 12px"><button class="primary" onclick="rerollUnlocked()">🎲 ロック以外を引く</button><button class="ghost" onclick="rerollAll()">ぜんぶ引き直す</button></div>
+      <div id="catList"></div>
+      <div class="result-box">
+        <div class="sent" id="ideaSentence">まだ何も引いていないよ。🎲からどうぞ。</div>
+        <div class="actions"><button class="ghost" onclick="copyIdea()">📋 コピー</button><button class="primary" onclick="openSaveIdea()">⭐ 保存</button></div>
+      </div>
+      <p class="note">各カテゴリの＋から、ゆのの案も足せるよ。値をタップするとそこだけ引き直し。</p>
+    </section>
+
+    <section class="view" id="view-box">
+      <div class="head"><div><h2>📦 保存箱</h2><p>気に入った標本たちの住まい。</p></div></div>
+      <div class="box-sec"><h3>🎨 パレット</h3><div id="boxPal"></div></div>
+      <div class="box-sec"><h3>🧍 キャラ配色案</h3><div id="boxPlan"></div></div>
+      <div class="box-sec"><h3>💡 発想メモ</h3><div id="boxIdea"></div></div>
+    </section>
+
+  </main>
+  <nav class="tabbar">
+    <button id="tab-spec" class="active" onclick="switchView('spec')"><b>🗂</b>標本</button>
+    <button id="tab-lab" onclick="switchView('lab')"><b>🧪</b>実験</button>
+    <button id="tab-idea" onclick="switchView('idea')"><b>💡</b>発想</button>
+    <button id="tab-box" onclick="switchView('box')"><b>📦</b>保存箱</button>
+  </nav>
+</div>
+
+<div class="modal-wrap" id="saveModalWrap" onclick="if(event.target===this)closeSaveModal()">
+  <div class="modal">
+    <div class="handle"></div>
+    <h2 id="saveModalTitle">保存する</h2>
+    <div class="field"><label for="saveName">名前</label><input type="text" id="saveName" placeholder="呼びやすい名前をどうぞ"></div>
+    <div class="field"><label for="saveMemo">メモ</label><textarea id="saveMemo" placeholder="使いどころ、気分、なんでも"></textarea></div>
+    <div class="actions"><button class="ghost" onclick="closeSaveModal()">やめる</button><button class="primary" id="saveModalOk">保存する</button></div>
+  </div>
+</div>
+
+<div class="modal-wrap" id="addModalWrap" style="z-index:60" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal">
+    <div class="handle"></div>
+    <h2 id="addModalTitle">案を足す</h2>
+    <div class="field"><label for="addValue">新しい案</label><input type="text" id="addValue" placeholder="例：古い鍵"></div>
+    <div class="actions"><button class="ghost" onclick="closeAddModal()">やめる</button><button class="primary" id="addModalOk">足す</button></div>
+  </div>
+</div>
+
+<div class="modal-wrap" id="palEditWrap" onclick="if(event.target===this)closePalEditor()">
+  <div class="modal">
+    <div class="handle"></div>
+    <h2 id="palEditTitle">自作標本をつくる</h2>
+    <div class="field"><label for="peName">名前</label><input type="text" id="peName" placeholder="例：屋上のラムネ">
+      <div style="margin-top:7px"><button class="ghost small" onclick="rollNames()">🎲 名前のヒント</button></div>
+      <div class="hint-chips" id="peNameHints"></div></div>
+    <div class="field"><label for="peMood">雰囲気のひとこと</label><input type="text" id="peMood" placeholder="例：栓を抜いた瞬間の空">
+      <div style="margin-top:7px"><button class="ghost small" onclick="rollMoods()">🎲 ひとことのヒント</button></div>
+      <div class="hint-chips" id="peMoodHints"></div></div>
+    <div class="field"><label>タグ（いくつでも）</label><div class="tagpick" id="peTags"></div></div>
+    <div class="field"><label>役割と色</label><div id="peRows"></div></div>
+    <div class="actions"><button class="ghost" onclick="closePalEditor()">やめる</button><button class="primary" onclick="savePalEditor()">棚に置く</button></div>
+  </div>
+</div>
+
+<div class="modal-wrap" id="settingsWrap" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <div class="handle"></div>
+    <h2>保存とバックアップ</h2>
+    <div class="msec"><h3>書き出し</h3><p>保存箱・実験室・追加した案を、まるごとJSONに。</p><button class="primary wide" onclick="exportJSON()">⬇ JSONを書き出す</button></div>
+    <div class="msec"><h3>読み込み</h3><p>書き出したJSONから復元する。今の内容は置き換わるよ。</p><input type="file" id="importInput" accept="application/json,.json" hidden onchange="importJSON(event)"><button class="ghost wide" onclick="document.getElementById('importInput').click()">⬆ JSONを読み込む</button></div>
+    <div class="msec"><h3>自分のタグ</h3><p>タップで削除。タグの追加は自作標本エディタの「＋ タグ」からできるよ。</p><div class="tagpick" id="myTagList"></div></div>
+    <div class="msec"><h3>ぜんぶ消す</h3><p>この端末の保存内容を初期状態に戻す。戻せないから慎重にね。</p><button class="danger wide" onclick="wipeAll()">🗑 初期化する</button></div>
+    <div class="actions"><button class="ghost wide" onclick="closeSettings()">閉じる</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<script>
+"use strict";
+/* ============ データ標本 ============ */
+const ROLES=["主役","補助","差し色","背景","文字","金属"];
+// c: [主役,補助,差し色,背景,文字,金属]
+const PALETTES=[
+ {n:"ソーダフロート",m:"ふんわり甘い、光る午後",t:["パステル"],c:["#9ED8E8","#F9E6EF","#F8B4C4","#FBFDFE","#5A6B78","#E8C98F"]},
+ {n:"ミモザの窓辺",m:"春のはじまりの黄色い息",t:["パステル","季節"],c:["#F6DE8D","#CDE7C0","#F09E54","#FDFBF2","#6B6650","#D8B25C"]},
+ {n:"ラベンダーミルク",m:"眠る前のやわらかい紫",t:["パステル"],c:["#C7B6E4","#F1E9F7","#8EA7E0","#FBFAFD","#5F5A73","#C9CDDA"]},
+ {n:"ひなあられ",m:"ころころ転がる砂糖菓子",t:["パステル","和風"],c:["#F5B8C9","#BFE3D2","#F3E27E","#FFF9F5","#77606A","#E3C68E"]},
+ {n:"くすみローズ茶会",m:"冷めかけの紅茶と乾いた花",t:["くすみ"],c:["#C08A8E","#D9C3B8","#7E8F7C","#F3EDE8","#57484A","#B99B6B"]},
+ {n:"モーヴの黄昏",m:"言い出せないまま暮れる空",t:["くすみ"],c:["#9C8AA5","#C5B9C8","#D9A38A","#F2EFF1","#4E4553","#A99A8A"]},
+ {n:"スモークブルーの部屋",m:"静かな雨音の似合う室内",t:["くすみ"],c:["#7E93A8","#B9C6CF","#C89B7B","#EFF2F3","#3F4A55","#9FA8B5"]},
+ {n:"トロピカルサイン",m:"体温より高いネオンの昼",t:["ビビッド","夏"],c:["#FF5D73","#2EC4B6","#FFD23F","#FFFFFF","#25283D","#FF9F1C"]},
+ {n:"ポップシグナル",m:"信号ぜんぶ青になる予感",t:["ビビッド"],c:["#3A86FF","#FF006E","#FFBE0B","#F8F9FA","#1B1B1E","#8338EC"]},
+ {n:"藍と生成り",m:"洗いざらしの浴衣の記憶",t:["和風"],c:["#2A4073","#E8E2D2","#B33E3E","#F5F2E9","#2C2C2C","#B08D57"]},
+ {n:"桜鼠と抹茶",m:"渋いのに華やぐ和の午後",t:["和風","くすみ"],c:["#C8A3A7","#8A9A5B","#C1554D","#F4EFE9","#4A413A","#B49B57"]},
+ {n:"月白と紅",m:"白磁にひとしずくの紅",t:["和風"],c:["#EAF0F2","#7A8B99","#A22041","#F7F9FA","#31383F","#C0A46B"]},
+ {n:"若竹の朝",m:"露のまだ残る青竹の道",t:["和風","季節"],c:["#68BE8D","#DDE8D5","#E1A33E","#F7FAF4","#3C4A3E","#B7A15A"]},
+ {n:"図書室のボルドー",m:"革表紙と古い読書灯",t:["クラシック"],c:["#6D2E3C","#C9AD8D","#3E5C50","#F1EAE0","#39302B","#A67C3D"]},
+ {n:"アンティークネイビー",m:"仕立てのいい制服の襟",t:["クラシック"],c:["#2F3A56","#B9B1A2","#8C3B31","#EFECE4","#2B2B30","#8E793E"]},
+ {n:"骨董時計店",m:"止まった針と真鍮の匂い",t:["クラシック","退廃"],c:["#8A6F52","#CBB9A0","#3F5E63","#EFE8DB","#3E362C","#B08A45"]},
+ {n:"夜会の黒薔薇",m:"燭台の影に沈む深紅",t:["ゴシック"],c:["#1B1720","#4A2436","#8F1D2C","#0F0D13","#D9D2DC","#8C7444"]},
+ {n:"銀十字の聖堂",m:"冷たい石床と朝の祈り",t:["ゴシック"],c:["#23262E","#5A5F6E","#7E5A9E","#14161B","#CDD1DC","#AEB4C2"]},
+ {n:"ネオン雨",m:"濡れた路面に滲む電光",t:["サイバー"],c:["#0FE3D0","#1B2140","#FF3D81","#0B0E1A","#E6F7FF","#9BA7C4"]},
+ {n:"電脳サンセット",m:"回線の向こうの夕焼け",t:["サイバー"],c:["#FF6EC7","#7A5CFF","#FFE156","#181233","#F3EFFF","#C0B6E8"]},
+ {n:"星屑のヴェール",m:"夜の底に散らばる金の粒",t:["幻想","夜空"],c:["#8D7BC0","#3B3C6E","#F1D27A","#1C1D3A","#ECE9F7","#D9C27E"]},
+ {n:"硝子の湖",m:"触れたら鳴りそうな水面",t:["幻想"],c:["#A9D5D8","#DFEFF0","#E9AFC1","#F6FBFB","#4C6467","#C4CFCE"]},
+ {n:"オーロラの帳",m:"極夜にほどける光のカーテン",t:["幻想","夜空"],c:["#3BC9A8","#5A6FD3","#E97CB1","#101B2E","#E7F3F0","#A9C3C0"]},
+ {n:"錆と埃の温室",m:"忘れられた硝子屋根の楽園",t:["退廃","森"],c:["#7C5B44","#A5988A","#5E7263","#E8E2D6","#43392F","#8A6B3E"]},
+ {n:"滅びの都",m:"色の抜けた石畳の静けさ",t:["退廃"],c:["#5B5E6B","#8D8579","#7C3B3E","#DAD5CC","#3A3A40","#7E7460"]},
+ {n:"春・花霞",m:"視界の端がぜんぶ桜",t:["季節","パステル"],c:["#F5C6D0","#CFE3C8","#E86A8A","#FDF7F7","#6E5A60","#E0C48A"]},
+ {n:"夏・入道雲",m:"まぶしさで笑ってしまう空",t:["季節","夏"],c:["#3D9BE9","#FFFFFF","#FFD84D","#EAF6FF","#274B63","#F2C14E"]},
+ {n:"秋・落葉焚き",m:"煙の匂いと焦げた橙",t:["季節"],c:["#C25E2E","#D9A441","#93332B","#F6EFE3","#4C3A2C","#A87F3F"]},
+ {n:"冬・粉雪",m:"音を吸い込む白い朝",t:["季節"],c:["#DCE7EE","#9FB6C6","#A34A5D","#F8FAFC","#48586A","#C9CFD8"]},
+ {n:"深海のシャンデリア",m:"沈んだ舞踏会の光の名残",t:["海","幻想"],c:["#123A5C","#1E6A8C","#F2C879","#0C2338","#DCEBF4","#C9A45B"]},
+ {n:"真昼のラグーン",m:"足首まで透ける浅瀬",t:["海","夏"],c:["#28C3C9","#8FE3DD","#FF8E6E","#F2FCFB","#1F5257","#E9C46A"]},
+ {n:"珊瑚の標本",m:"引き出しの中の南の海",t:["海"],c:["#F97F6F","#FBD1C2","#2E8C86","#FFF6F1","#5C4038","#D9A15E"]},
+ {n:"苔の教会",m:"緑に呑まれていく祈りの跡",t:["森","退廃"],c:["#4C6B45","#8FA07A","#B0492F","#EFF0E5","#38402F","#94793C"]},
+ {n:"妖精の森",m:"木漏れ日がいたずらする道",t:["森","幻想"],c:["#6FBF8F","#C9E7C3","#E8A0C8","#F4FAF1","#3E5A48","#CBB768"]},
+ {n:"藍夜と月",m:"世界がしんとする時間",t:["夜空"],c:["#1E2A52","#40548C","#F4E4A6","#131A36","#E8ECF7","#C8B36A"]},
+ {n:"明けの群青",m:"夜が終わることを知る色",t:["夜空"],c:["#2C4A7C","#8FA6CF","#F0956B","#1B2742","#EAF0FA","#B9A26A"]},
+ {n:"はじまりの雷",m:"出会った日の、空の機嫌",t:["幻想","夜空"],c:["#F2CE4A","#3D5A8C","#7EC3E6","#1E2A4A","#F0F3FA","#D9C27E"]},
+ {n:"白いセーラーと風",m:"高台の窓に吹き込む昼",t:["海","パステル"],c:["#FDFDFB","#7EC3E6","#F0B54A","#EAF5FB","#3C5A74","#C9CFD8"]},
+ {n:"宵闇の金木犀",m:"夜気に溶ける甘い橙",t:["季節","夜空"],c:["#E8A33D","#6D5E8C","#EFE3B0","#241F33","#F0EADF","#C89B4B"]},
+ {n:"雨上がりの紫陽花",m:"雫ごと色を集めた午後",t:["季節","くすみ"],c:["#7D93C9","#A9C3B2","#C97DA4","#F0F3F1","#4A5568","#9FB3C8"]},
+ {n:"焼き菓子の午後",m:"バターと紅茶の湯気",t:["クラシック","くすみ"],c:["#C89B62","#E7D6B8","#8C4A3E","#F7F0E3","#5A4632","#B08D57"]},
+ {n:"人魚の鱗",m:"光の角度で嘘をつく色",t:["海","幻想"],c:["#4FB8AF","#9C7FC9","#F2A7C3","#EFF9F7","#2F5B58","#C4CBD6"]},
+ {n:"魔女の書斎",m:"薬草と古書のいる薄闇",t:["幻想","ゴシック"],c:["#5C4A73","#7E8C5A","#C97B3E","#2A2433","#E5DEEE","#A67C3D"]},
+ {n:"硝子ペン先の夜",m:"インク壺に沈む星",t:["夜空","クラシック"],c:["#28406E","#7A88A8","#D8B84A","#EDF0F6","#2C3444","#AEB4C2"]},
+ {n:"果実酒の棚",m:"琥珀の中で眠る季節",t:["くすみ","クラシック"],c:["#8E3B52","#C98A3E","#5E7263","#F3EBE2","#4A3038","#B08A45"]},
+ {n:"未明のプール",m:"誰もいない水面の静電気",t:["海","夜空"],c:["#2E6E8C","#7FC3D8","#F2E27E","#123244","#DCEFF5","#9BA7C4"]},
+ {n:"苺ミルクの噴水",m:"甘さ過剰、反省はしない",t:["パステル","ビビッド"],c:["#F589A8","#FBD8E2","#8CD8C0","#FFF5F8","#8C4A5E","#E8C98F"]},
+ {n:"翡翠の茶室",m:"静けさに濃度がある部屋",t:["和風"],c:["#3E7C5E","#C9CBB8","#C87E30","#F2F1E6","#3A4438","#94793C"]}
+];
+const TAGS=["すべて","パステル","くすみ","ビビッド","和風","クラシック","ゴシック","サイバー","幻想","退廃","季節","海","森","夜空"];
+const CATS=[
+ {k:"world",l:"世界観",items:["深海","星霜の図書館","廃駅","空中庭園","雪の温室","砂の王国","真夜中の市場","海底神殿","機械仕掛けの街","魔女の薬房","月面遊園地","硝子の森","雲の上の港","蒸気の工房","遺跡の泉","極夜の灯台","春の学舎","骨董品店","電脳都市","花葬の教会","朝焼けの飛行場","時計塔の内側","眠る火山のふもと","絵本の中の王国","満潮に沈む街","オーロラ観測所","羊飼いの高原","水没図書館"]},
+ {k:"color",l:"配色",items:["白×金","黒×朱","藍×銀","紫×緑","生成り×煤色","ミント×珊瑚","灰×水色","墨×桜","深緑×琥珀","群青×真鍮","白銀×氷青","黒×虹彩","ワイン×鈍色","卵色×鉄紺","苔×銅","桃×灰青","山吹×紺青","薄荷×煉瓦","月白×藤","漆黒×蛍光緑","珊瑚×真珠"]},
+ {k:"material",l:"素材",items:["透け布","ベルベット","錆びた金属","磨りガラス","鱗","和紙","レース","なめし革","羽根","真珠","蝋","苔むした石","絹","鎖","貝殻","氷","木彫り","琺瑯","曇り鏡","オーガンジー","白陶器","燻し銀","生成りの麻","螺鈿","フェルト","硝子繊維"]},
+ {k:"silhouette",l:"シルエット",items:["非対称","マーメイドライン","ハイネックと長手袋","ケープ重ね","裾の長い外套","立ち襟","大きな袖","短丈とロングブーツ","幾重のドレープ","直線的ミニマル","着物アレンジ","軍服風","シャツと吊りスカート","ふくらんだ袖","引き裾","左右で丈が違う","フード付きローブ","ビスチェ重ね","ハイウエストと短上着","燕尾","サロペット"]},
+ {k:"deco",l:"装飾",items:["古い鍵","ボタン多め","刺繍","硝子玉","鎖の垂れ飾り","花のコサージュ","リボン結び","徽章","羽根飾り","ベール","数珠","腰の小物入れ","帯留め","蝶の意匠","星図の刺繍","小さな鈴","組紐","封蝋","白い羽根","硝子の小瓶","押し花のしおり","肩章","透かし編みの手袋","匂い袋"]},
+ {k:"motif",l:"モチーフ",items:["月の満ち欠け","深海魚","蝶","薔薇と棘","歯車","星座","鳥籠","燭台","羅針盤","雪の結晶","金魚","白骨","鏡","砂時計","稲妻","睡蓮","王冠","眼","古い手紙","糸電話","紙飛行機","風見鶏","燈台","流星群","万華鏡","音叉","貝の化石","あやとり"]},
+ {k:"bg",l:"背景",items:["逆光の窓辺","水中から見上げた光","星降る丘","廃墟に差す朝","雨のガラス越し","花吹雪","蝋燭だけの室内","ネオンの路地","霧の桟橋","月夜の屋上","書架の谷間","雪原の一本道","夕焼けの教室","深い森の木漏れ日","祭りの提灯","高台から見下ろす街","入道雲の下の坂道","観覧車の中","始発電車の窓","水槽の青いひかり","波打ち際の夕暮れ"]}
+];
+const SLOTS=[
+ {k:"hair",l:"髪"},{k:"eyes",l:"目"},{k:"skin",l:"肌"},{k:"top",l:"トップス"},
+ {k:"bottom",l:"ボトム"},{k:"accent",l:"差し色"},{k:"metal",l:"金属"},{k:"shoes",l:"靴"}
+];
+const DEFAULT_SLOTS={hair:"#EDEAE4",eyes:"#4E7FD0",skin:"#F6DECF",top:"#6B7FA8",bottom:"#3D4560",accent:"#E4A23C",metal:"#C9B36A",shoes:"#4A423C"};
+const SKINS=["#FBEADC","#F6DECF","#F0CDAE","#E2B18C","#C68B62","#9C6844","#74492E"];
+const NAME_A=["深海","未明","白夜","花冷え","月虹","春雷","硝子","真珠","群青","黄昏","夜明け","水底","天窓","回廊","砂丘","氷河","蜃気楼","残響","満月","新月","霧雨","陽炎","雪解け","星屑","琥珀","藍染","絹雲","入江","燈火","余白","睡蓮","風待ち","遠雷","木漏れ日","潮騒","銀河","朝焼け","宵闇","泡沫","追憶"];
+const NAME_B=["シャンデリア","標本","待合室","舞踏会","図書館","譜面","オルゴール","手紙","約束","ため息","カーテン","鍵盤","水槽","回転木馬","燈台","温室","聖歌隊","実験室","遊園地","写真館","枕元","栞","残像","アトリエ","停留所","観測所","噴水","王国","調律","独白","カーニバル","螺旋","花束","航路","子守唄","万華鏡","展覧会","帳","午睡","序曲"];
+const MOODS=["息を止めたくなる静けさ","誰にも言えない色をしてる","目が覚める直前の夢のつづき","ポケットにしまいたい光","雨の予感だけが残ってる","振り向いたら消えてしまう色","甘さの奥に少しの嘘","呼吸のリズムで揺れる光","忘れ物を取りに戻る途中","世界の音量が下がる時間","触れたら指先が染まりそう","誰かの初恋の落とし物","時間が丸くなる場所","こっそり泣くのにちょうどいい","祝福と予感が半分ずつ","昨日の続きをやり直す朝","秘密基地の合言葉みたいな","ひかりの粒を数える午後","遠くで汽笛が鳴っている","名前を呼ばれる直前の空気","栞を挟んだまま眠る夜","はじまりの匂いがする","おわりの手前で立ち止まる色","誰も知らない祝日","心臓の音だけが大きい","封を切る前の予感","肯定だけでできてる","ちょっとだけ強がってる色","懐かしさに未来が混ざる","風がページをめくっていく"];
+const METALS=["#C9B36A","#B08D57","#C4CBD6","#AAB4BE","#B87747","#8E793E"];
+
+/* ============ 状態と保存 ============ */
+const LS_KEY="irodori-specimen-v1";
+let noStore=false;
+function defaultState(){return{mode:"hex",tag:"すべて",favs:[],plans:[],ideas:[],custom:{},
+ myPalettes:[],myTags:[],lab:{slots:Object.assign({},DEFAULT_SLOTS),locks:{},sel:"hair",refs:[],refSel:null},
+ idea:{vals:{},locks:{}}};}
+/* 拡張メモ（レグへ）：
+   ・自作パレット棚（state.myPalettes）と参考画像の複数管理（state.lab.refs）は実装済み
+   ・配色/発想の案追加は、このファイル冒頭の PALETTES / CATS 配列に足すだけでOK（UIと構造はそらひ管轄）*/
+let state=defaultState();
+function loadState(){try{const raw=localStorage.getItem(LS_KEY);if(raw){const s=JSON.parse(raw);state=Object.assign(defaultState(),s);state.lab=Object.assign(defaultState().lab,s.lab||{});state.idea=Object.assign(defaultState().idea,s.idea||{});if(state.lab.ref){state.lab.refs=[{id:uid(),img:state.lab.ref,ext:state.lab.ext||[]}];state.lab.refSel=state.lab.refs[0].id;delete state.lab.ref;delete state.lab.ext;}if(!Array.isArray(state.lab.refs))state.lab.refs=[];if(!Array.isArray(state.myPalettes))state.myPalettes=[];if(!Array.isArray(state.myTags))state.myTags=[];}}catch(e){noStore=true;}}
+function saveState(){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){noStore=true;document.getElementById("storageBanner").classList.add("show");}}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+/* ============ 色ユーティリティ ============ */
+function normHex(v){if(!v)return null;v=v.trim().replace(/^#?/,"#");if(/^#[0-9a-fA-F]{3}$/.test(v))v="#"+[...v.slice(1)].map(c=>c+c).join("");return /^#[0-9a-fA-F]{6}$/.test(v)?v.toUpperCase():null;}
+function hexToRgb(h){h=normHex(h)||"#000000";return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,s=0;const l=(mx+mn)/2;if(mx!==mn){const d=mx-mn;s=l>0.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;default:h=(r-g)/d+4;}h*=60;}return[Math.round(h),Math.round(s*100),Math.round(l*100)];}
+function hslToHex(h,s,l){h=((h%360)+360)%360;s=Math.min(100,Math.max(0,s))/100;l=Math.min(100,Math.max(0,l))/100;const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;let r=0,g=0,b=0;if(h<60){r=c;g=x;}else if(h<120){r=x;g=c;}else if(h<180){g=c;b=x;}else if(h<240){g=x;b=c;}else if(h<300){r=x;b=c;}else{r=c;b=x;}const f=v=>Math.round((v+m)*255).toString(16).padStart(2,"0");return("#"+f(r)+f(g)+f(b)).toUpperCase();}
+function hexToHsl(h){const[r,g,b]=hexToRgb(h);return rgbToHsl(r,g,b);}
+function fmt(hex){hex=normHex(hex)||"#000000";if(state.mode==="rgb"){const[r,g,b]=hexToRgb(hex);return`rgb(${r}, ${g}, ${b})`;}if(state.mode==="hsl"){const[h,s,l]=hexToHsl(hex);return`hsl(${h}, ${s}%, ${l}%)`;}return hex;}
+function toward(h,target,step){const d=((target-h+540)%360)-180;return Math.abs(d)<=step?target:((h+Math.sign(d)*step)%360+360)%360;}
+const VARS=[
+ ["明るく",(h,s,l)=>[h,s,Math.min(96,l+14)]],
+ ["暗く",(h,s,l)=>[h,s,Math.max(6,l-14)]],
+ ["くすませる",(h,s,l)=>[h,Math.max(4,s-32),l]],
+ ["鮮やかに",(h,s,l)=>[h,Math.min(100,s+28),l]],
+ ["暖色寄り",(h,s,l)=>[toward(h,25,22),s,l]],
+ ["寒色寄り",(h,s,l)=>[toward(h,215,22),s,l]],
+ ["補色",(h,s,l)=>[h+180,s,l]],
+ ["類似 −30°",(h,s,l)=>[h-30,s,l]],
+ ["類似 ＋30°",(h,s,l)=>[h+30,s,l]],
+ ["分裂補色 A",(h,s,l)=>[h+150,s,l]],
+ ["分裂補色 B",(h,s,l)=>[h+210,s,l]]
+];
+function textOn(hex){const[r,g,b]=hexToRgb(hex);return(r*299+g*587+b*114)/1000>150?"#2C2F38":"#F5F9FC";}
+
+/* ============ 共通UI ============ */
+let toastTimer=null;
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),1700);}
+function copyText(text,label){if(!text){toast("コピーするものがないよ");return;}const done=()=>toast((label||"コード")+"をコピーしたよ");if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));}else fallbackCopy(text,done);}
+function fallbackCopy(text,done){const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){toast("コピーできなかった…手動でお願い！");}document.body.removeChild(ta);}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function switchView(name){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.getElementById("view-"+name).classList.add("active");document.querySelectorAll(".tabbar button").forEach(b=>b.classList.remove("active"));document.getElementById("tab-"+name).classList.add("active");window.scrollTo({top:0});}
+
+/* ============ 標本室 ============ */
+function setMode(m){state.mode=m;saveState();document.querySelectorAll("#modeChips button").forEach(b=>b.classList.toggle("active",b.dataset.m===m));renderPalettes();}
+function setTag(t){state.tag=t;saveState();renderTagChips();renderPalettes();}
+function renderTagChips(){const tags=["すべて","自作"].concat(TAGS.slice(1)).concat(state.myTags);window._tags=tags;document.getElementById("tagChips").innerHTML=tags.map((t,i)=>`<button class="${state.tag===t?"active":""}" onclick="setTagIdx(${i})">${esc(t)}</button>`).join("");}
+function setTagIdx(i){setTag(window._tags[i]);}
+function paletteCard(o){
+ const p=o.p;const[mainC,subC,accC,bgC,txC]=p.c;
+ const rows=p.c.map((hex,i)=>`<button class="prow" onclick="copyText('${fmt(hex)}','${ROLES[i]}の色')"><span class="sw" style="background:${hex}"></span><span class="role">${ROLES[i]}</span><code>${fmt(hex)}</code></button>`).join("");
+ const tags=(o.kind==="mine"?["自作"].concat(p.t):p.t).map(t=>`<span class="tag">${t}</span>`).join("");
+ const key=o.kind==="mine"?`'mine','${p.id}'`:`'off',${o.i}`;
+ const cp=`<button class="pal-btn" onclick="copyPal(${key},'ja')">📋 全色</button><button class="pal-btn" onclick="copyPal(${key},'en')">📋 EN</button>`;
+ const btns=o.kind==="mine"
+  ?cp+`<button class="pal-btn" onclick="openPalEditor('${p.id}')">✏ 編集</button><button class="pal-btn" onclick="delMyPalette('${p.id}')">🗑</button><button class="pal-btn" onclick="myPaletteToLab('${p.id}')">🧪 実験室へ</button>`
+  :cp+`<button class="pal-btn" onclick="favPalette(${o.i})">⭐ 保存</button><button class="pal-btn" onclick="paletteToLab(${o.i})">🧪 実験室へ</button>`;
+ return`<article class="pal" style="background:${bgC};color:${txC};border-color:${txC}33">
+  <span class="pin" aria-hidden="true"></span>
+  <div class="strata"><i style="width:60%;background:${mainC}"></i><i style="width:30%;background:${subC}"></i><i style="width:10%;background:${accC}"></i></div>
+  <div class="ratio-note">目安 60（主役）: 30（補助）: 10（差し色）</div>
+  <h3>${esc(p.n)}</h3><p class="mood">${esc(p.m)}</p>
+  ${rows}
+  <div class="pal-foot">${tags}<span class="sp"></span>${btns}</div>
+ </article>`;
+}
+function renderPalettes(){
+ const mine=state.myPalettes.map(p=>({p,kind:"mine"}));
+ const official=PALETTES.map((p,i)=>({p,i,kind:"off"}));
+ let list=mine.concat(official);
+ if(state.tag==="自作")list=mine;
+ else if(state.tag!=="すべて")list=list.filter(o=>o.p.t.includes(state.tag));
+ let today="";
+ if(state.tag==="すべて"){const d=new Date();const ti=(d.getFullYear()*372+d.getMonth()*31+d.getDate())%PALETTES.length;today=`<p class="today-label">☀ 今日の標本</p>`+paletteCard({p:PALETTES[ti],i:ti,kind:"off"})+`<p class="today-label" style="color:var(--soft)">🗂 ぜんぶの棚</p>`;}
+ document.getElementById("palList").innerHTML=today+(list.length?list.map(o=>paletteCard(o)).join(""):`<div class="empty">このタグの標本はまだ棚に無いみたい。${state.tag==="自作"?"「＋ 自作標本」から最初のひとつをどうぞ。":""}</div>`);
+}
+function favPalette(idx){const p=PALETTES[idx];openSaveModal("パレットを保存箱へ",{name:p.n,memo:""},(nm,me)=>{state.favs.unshift({id:uid(),name:nm||p.n,memo:me,pal:{n:p.n,m:p.m,c:p.c.slice()}});saveState();renderBox();toast("保存箱にしまったよ");});}
+function applyPalette(c){const map={hair:c[3],eyes:c[1],top:c[0],bottom:c[4],accent:c[2],metal:c[5],shoes:c[4]};let skipped=0;for(const k in map){if(state.lab.locks[k]){skipped++;continue;}state.lab.slots[k]=normHex(map[k])||state.lab.slots[k];}saveState();renderLab();return skipped;}
+function paletteToLab(idx){const sk=applyPalette(PALETTES[idx].c);switchView("lab");toast(sk?`実験室に反映（🔒${sk}箇所はそのまま）`:"実験室に反映したよ");}
+function myPaletteToLab(id){const p=state.myPalettes.find(x=>x.id===id);if(!p)return;const sk=applyPalette(p.c);switchView("lab");toast(sk?`実験室に反映（🔒${sk}箇所はそのまま）`:"実験室に反映したよ");}
+function delMyPalette(id){if(!confirm("この自作標本を棚から下ろす？戻せないよ。"))return;state.myPalettes=state.myPalettes.filter(x=>x.id!==id);saveState();renderPalettes();toast("棚から下ろしたよ");}
+let peId=null;
+function openPalEditor(id,prefill){peId=id||null;const p=peId?state.myPalettes.find(x=>x.id===peId):null;
+ document.getElementById("palEditTitle").textContent=p?"自作標本を直す":"自作標本をつくる";
+ document.getElementById("peName").value=p?p.n:"";
+ document.getElementById("peMood").value=p?p.m:"";
+ const sel=new Set(p?p.t:[]);
+ renderPeTags(sel);
+ document.getElementById("peNameHints").innerHTML="";document.getElementById("peMoodHints").innerHTML="";
+ let cols=p?p.c.slice():(prefill&&prefill.length?prefill.slice(0,6):["#7EC3E6","#FDFDFB","#F0B54A","#EAF5FB","#3C5A74","#C9CFD8"]);
+ while(cols.length<6)cols.push("#FFFFFF");
+ document.getElementById("peRows").innerHTML=ROLES.map((r,i)=>`<div class="rolerow"><span class="rl">${r}</span><input type="color" value="${cols[i]}" oninput="this.nextElementSibling.value=this.value.toUpperCase()"><input class="hex" type="text" value="${cols[i]}" onchange="peHex(this)"></div>`).join("");
+ document.getElementById("palEditWrap").classList.add("open");}
+function peHex(input){const hex=normHex(input.value);if(!hex){toast("HEXは #RRGGBB 形式でお願い！");input.value=input.previousElementSibling.value.toUpperCase();return;}input.value=hex;input.previousElementSibling.value=hex;}
+function closePalEditor(){document.getElementById("palEditWrap").classList.remove("open");peId=null;}
+function savePalEditor(){const n=document.getElementById("peName").value.trim();if(!n){toast("名前だけは付けてあげて？");return;}
+ const m=document.getElementById("peMood").value.trim();
+ const t=[...document.querySelectorAll("#peTags button.on")].map(b=>b.textContent);
+ const c=[...document.querySelectorAll("#peRows input.hex")].map(i=>normHex(i.value)||"#FFFFFF");
+ if(peId){const p=state.myPalettes.find(x=>x.id===peId);Object.assign(p,{n,m,t,c});}else state.myPalettes.unshift({id:uid(),n,m,t,c});
+ saveState();closePalEditor();setTag("自作");switchView("spec");toast("棚に置いたよ");}
+
+function renderPeTags(sel){const all=TAGS.slice(1).concat(state.myTags);document.getElementById("peTags").innerHTML=all.map(t=>`<button type="button" class="${sel.has(t)?"on":""}" onclick="this.classList.toggle('on')">${esc(t)}</button>`).join("")+`<button type="button" class="addtag" onclick="openAddTag()">＋ タグ</button>`;}
+function getPal(kind,key){return kind==="mine"?state.myPalettes.find(x=>x.id===key):PALETTES[key];}
+function copyPal(kind,key,lang){const p=getPal(kind,key);if(!p)return;
+ if(lang==="en"){const en=["dominant","secondary","accent","background","text","metallic"];copyText("color palette: "+p.c.map((hx,i)=>en[i]+" "+hx).join(", "),"英語パレット");}
+ else copyText(p.n+"｜"+p.c.map((hx,i)=>ROLES[i]+" "+hx).join("／"),"全色");}
+function pickN(arr,n){const a=arr.slice();const out=[];while(out.length<n&&a.length)out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]);return out;}
+function rollNames(){const out=[];const used=new Set();let guard=0;while(out.length<4&&guard++<60){const s=NAME_A[Math.floor(Math.random()*NAME_A.length)]+"の"+NAME_B[Math.floor(Math.random()*NAME_B.length)];if(!used.has(s)){used.add(s);out.push(s);}}
+ document.getElementById("peNameHints").innerHTML=out.map(s=>`<button type="button" onclick="document.getElementById('peName').value=this.textContent">${s}</button>`).join("");}
+function rollMoods(){document.getElementById("peMoodHints").innerHTML=pickN(MOODS,3).map(s=>`<button type="button" onclick="document.getElementById('peMood').value=this.textContent">${s}</button>`).join("");}
+function renderMyTags(){const el=document.getElementById("myTagList");el.innerHTML=state.myTags.length?state.myTags.map((t,i)=>`<button onclick="delMyTag(${i})">${esc(t)} ✕</button>`).join(""):'<span style="font-size:12.5px;color:var(--soft)">まだ無いよ。自作標本エディタの「＋ タグ」からどうぞ。</span>';}
+function delMyTag(i){const t=state.myTags[i];if(!confirm(`タグ「${t}」を消す？自作標本からもこのタグが外れるよ。`))return;state.myTags.splice(i,1);state.myPalettes.forEach(p=>p.t=p.t.filter(x=>x!==t));if(state.tag===t)state.tag="すべて";saveState();renderTagChips();renderPalettes();renderMyTags();toast(`タグ「${t}」を片づけたよ`);}
+
+/* ============ 実験室 ============ */
+function dollSVG(s){return`<svg viewBox="0 0 220 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="配色プレビュー人形">
+<ellipse cx="110" cy="302" rx="56" ry="8" fill="rgba(44,47,56,.08)"/>
+<path d="M58,96 Q58,28 110,26 Q162,28 162,96 Q162,134 148,152 L134,128 L86,128 L72,152 Q58,134 58,96 Z" fill="${s.hair}"/>
+<rect x="94" y="244" width="11" height="36" fill="${s.skin}"/><rect x="115" y="244" width="11" height="36" fill="${s.skin}"/>
+<rect x="89" y="276" width="20" height="15" rx="7" fill="${s.shoes}"/><rect x="111" y="276" width="20" height="15" rx="7" fill="${s.shoes}"/>
+<path d="M82,196 L138,196 L152,246 Q110,254 68,246 Z" fill="${s.bottom}"/>
+<rect x="63" y="146" width="16" height="54" rx="8" fill="${s.top}"/><rect x="141" y="146" width="16" height="54" rx="8" fill="${s.top}"/>
+<circle cx="71" cy="204" r="7" fill="${s.skin}"/><circle cx="149" cy="204" r="7" fill="${s.skin}"/>
+<rect x="103" y="128" width="14" height="14" fill="${s.skin}"/>
+<rect x="80" y="138" width="60" height="62" rx="16" fill="${s.top}"/>
+<path d="M110,148 L94,140 L94,156 Z" fill="${s.accent}"/><path d="M110,148 L126,140 L126,156 Z" fill="${s.accent}"/><circle cx="110" cy="148" r="5" fill="${s.accent}" stroke="rgba(0,0,0,.15)"/>
+<circle cx="110" cy="170" r="3.5" fill="${s.metal}"/><circle cx="110" cy="184" r="3.5" fill="${s.metal}"/>
+<circle cx="110" cy="94" r="40" fill="${s.skin}"/>
+<path d="M70,92 Q70,46 110,44 Q150,46 150,92 Q140,76 126,82 Q118,68 103,80 Q88,72 70,92 Z" fill="${s.hair}"/>
+<circle cx="142" cy="62" r="5" fill="${s.metal}" stroke="rgba(0,0,0,.15)"/>
+<ellipse cx="94" cy="102" rx="6.5" ry="8" fill="${s.eyes}"/><ellipse cx="126" cy="102" rx="6.5" ry="8" fill="${s.eyes}"/>
+<circle cx="92" cy="99" r="2" fill="#FFFFFF" opacity=".9"/><circle cx="124" cy="99" r="2" fill="#FFFFFF" opacity=".9"/>
+<path d="M104,118 Q110,123 116,118" stroke="rgba(0,0,0,.3)" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>`;}
+function renderLab(){
+ document.getElementById("dollCase").innerHTML=dollSVG(state.lab.slots);
+ document.getElementById("slotList").innerHTML=SLOTS.map(sl=>{const hex=state.lab.slots[sl.k];const lock=state.lab.locks[sl.k];
+  return`<div class="slotrow ${state.lab.sel===sl.k?"sel":""}">
+   <button class="pick" style="background:${hex}" aria-label="${sl.l}を基準にする" onclick="selectSlot('${sl.k}')"></button>
+   <span class="nm">${sl.l}</span>${state.lab.sel===sl.k?'<span class="selbadge">基準</span>':''}
+   <input type="color" value="${hex}" oninput="setSlot('${sl.k}',this.value)">
+   <input class="hex" type="text" value="${hex}" onchange="setSlotHex('${sl.k}',this)">
+   <button class="lock ${lock?"on":""}" onclick="toggleLock('${sl.k}')" aria-label="ロック切替">${lock?"🔒":"🔓"}</button>
+  </div>`;}).join("");
+ const sel=SLOTS.find(s=>s.k===state.lab.sel);const base=state.lab.slots[state.lab.sel];
+ document.getElementById("varTitle").textContent=`色の枝分かれ（基準：${sel.l} ${base}）`;
+ document.getElementById("varGrid").innerHTML=VARS.map(([label,fn],i)=>{const[h,s,l]=hexToHsl(base);const hex=hslToHex(...fn(h,s,l));
+  return`<button class="var-cell" style="background:${hex};color:${textOn(hex)}" onclick="applyVar(${i})"><b>${label}</b><code>${hex}</code></button>`;}).join("");
+ const r=curRef();if(r)state.lab.refSel=r.id;
+ document.getElementById("refThumbs").innerHTML=state.lab.refs.map(rf=>`<button class="ref-thumb ${rf.id===state.lab.refSel?"on":""}" onclick="selectRef('${rf.id}')" aria-label="参考画像を切り替え"><img src="${rf.img}" alt=""></button>`).join("");
+ document.getElementById("refBox").innerHTML=r?`<img src="${r.img}" alt="参考画像">`:"まだ画像はないよ";
+ const ext=r?r.ext:[];
+ document.getElementById("extRow").innerHTML=ext.map(hex=>`<button style="background:${hex}" aria-label="${hex}を基準部位へ" onclick="assignExt('${hex}')"></button>`).join("");
+ document.getElementById("extHint").style.display=ext.length?"block":"none";
+ document.getElementById("extActions").style.display=ext.length?"flex":"none";
+ renderPlanStrip();
+}
+function selectSlot(k){state.lab.sel=k;saveState();renderLab();}
+function setSlot(k,v){const hex=normHex(v);if(!hex)return;state.lab.slots[k]=hex;saveState();renderLab();}
+function setSlotHex(k,input){const hex=normHex(input.value);if(!hex){toast("HEXは #RRGGBB 形式でお願い！");input.value=state.lab.slots[k];return;}setSlot(k,hex);}
+function toggleLock(k){state.lab.locks[k]=!state.lab.locks[k];saveState();renderLab();}
+function applyVar(i){const k=state.lab.sel;if(state.lab.locks[k]){toast("その部位は🔒中！先に解除して？");return;}const[h,s,l]=hexToHsl(state.lab.slots[k]);const hex=hslToHex(...VARS[i][1](h,s,l));state.lab.slots[k]=hex;saveState();renderLab();toast(`${VARS[i][0]} → ${hex} を適用`);}
+function assignExt(hex){const k=state.lab.sel;if(state.lab.locks[k]){copyText(hex,"抽出色");return;}state.lab.slots[k]=hex;saveState();renderLab();toast(`基準の部位に ${hex} を置いたよ`);}
+function resetLab(){if(!confirm("部位の色を初期状態に戻す？（🔒も含めて全部）"))return;state.lab.slots=Object.assign({},DEFAULT_SLOTS);state.lab.locks={};saveState();renderLab();}
+function shuffleLab(){const base=Math.floor(Math.random()*360);const rnd=(a,b)=>a+Math.random()*(b-a);
+ const gen={hair:hslToHex(base+rnd(-15,15),rnd(18,45),rnd(62,86)),eyes:hslToHex(base+180+rnd(-20,20),rnd(45,70),rnd(38,55)),
+  skin:SKINS[Math.floor(Math.random()*SKINS.length)],top:hslToHex(base+rnd(-10,10),rnd(35,60),rnd(45,62)),
+  bottom:hslToHex(base+rnd(10,35),rnd(22,40),rnd(24,38)),accent:hslToHex(base+180+rnd(-15,15),rnd(60,85),rnd(52,66)),
+  metal:METALS[Math.floor(Math.random()*METALS.length)],shoes:hslToHex(base+rnd(-8,8),rnd(15,30),rnd(18,30))};
+ let any=false;for(const k in gen){if(state.lab.locks[k])continue;state.lab.slots[k]=gen[k];any=true;}
+ saveState();renderLab();toast(any?"ロック以外を引き直したよ":"全部🔒されてて動けない…！");}
+function curRef(){return state.lab.refs.find(r=>r.id===state.lab.refSel)||state.lab.refs[0]||null;}
+function selectRef(id){state.lab.refSel=id;saveState();renderLab();}
+function onRefImage(ev){const file=ev.target.files&&ev.target.files[0];ev.target.value="";if(!file)return;
+ if(state.lab.refs.length>=4){toast("画像は4枚まで！どれか外してから足してね");return;}
+ const img=new Image();img.onload=()=>{try{
+   const th=document.createElement("canvas");const sc=Math.min(1,480/img.width);th.width=Math.max(1,Math.round(img.width*sc));th.height=Math.max(1,Math.round(img.height*sc));
+   th.getContext("2d").drawImage(img,0,0,th.width,th.height);const dataURL=th.toDataURL("image/jpeg",0.82);
+   const cv=document.createElement("canvas");cv.width=64;cv.height=64;const cx=cv.getContext("2d");cx.drawImage(img,0,0,64,64);
+   const data=cx.getImageData(0,0,64,64).data;const buckets=new Map();
+   for(let i=0;i<data.length;i+=4){if(data[i+3]<128)continue;const key=(data[i]>>5)*10000+(data[i+1]>>5)*100+(data[i+2]>>5);
+    const b=buckets.get(key)||{r:0,g:0,b:0,n:0};b.r+=data[i];b.g+=data[i+1];b.b+=data[i+2];b.n++;buckets.set(key,b);}
+   const sorted=[...buckets.values()].sort((a,b)=>b.n-a.n).map(b=>[Math.round(b.r/b.n),Math.round(b.g/b.n),Math.round(b.b/b.n)]);
+   const picked=[];for(const[r,g,b]of sorted){if(picked.every(([pr,pg,pb])=>Math.abs(pr-r)+Math.abs(pg-g)+Math.abs(pb-b)>70))picked.push([r,g,b]);if(picked.length>=8)break;}
+   const ref={id:uid(),img:dataURL,ext:picked.map(([r,g,b])=>("#"+[r,g,b].map(v=>v.toString(16).padStart(2,"0")).join("")).toUpperCase())};
+   state.lab.refs.push(ref);state.lab.refSel=ref.id;
+   saveState();renderLab();toast("代表色を抽出したよ（端末内処理）");
+  }catch(e){toast("画像の処理に失敗しちゃった…別の画像で試してみて");}URL.revokeObjectURL(img.src);};
+ img.onerror=()=>{toast("その画像は読み込めなかったみたい");URL.revokeObjectURL(img.src);};
+ img.src=URL.createObjectURL(file);}
+function saveExtPalette(){const r=curRef();if(!r||!r.ext.length){toast("先に画像から色を抽出してね");return;}openPalEditor(null,r.ext.slice());}
+function clearRef(){const r=curRef();if(!r){toast("外す画像がないよ");return;}state.lab.refs=state.lab.refs.filter(x=>x.id!==r.id);state.lab.refSel=state.lab.refs.length?state.lab.refs[0].id:null;saveState();renderLab();}
+function openSavePlan(){openSaveModal("キャラ配色案を保存",{name:"案"+String.fromCharCode(65+(state.plans.length%26)),memo:""},(nm,me)=>{state.plans.unshift({id:uid(),name:nm||"無名の案",memo:me,slots:Object.assign({},state.lab.slots)});saveState();renderLab();renderBox();toast("配色案を保存したよ");});}
+function planSwatches(slots){return`<span class="sws">${SLOTS.map(s=>`<i style="background:${slots[s.k]||"#DDD"}" title="${s.l}"></i>`).join("")}</span>`;}
+function renderPlanStrip(){const el=document.getElementById("planStrip");el.innerHTML=state.plans.length?state.plans.map(p=>`<div class="plan-card">${planSwatches(p.slots)}<strong>${esc(p.name)}</strong><button class="ghost small" onclick="loadPlan('${p.id}')">読み込む</button><button class="danger small" onclick="delItem('plans','${p.id}')">削除</button></div>`).join(""):`<div class="empty">まだ案がないよ。⭐で最初のひとつを。</div>`;}
+function loadPlan(id){const p=state.plans.find(x=>x.id===id);if(!p)return;state.lab.slots=Object.assign({},DEFAULT_SLOTS,p.slots);saveState();renderLab();switchView("lab");toast(`「${p.name}」を人形に着せたよ`);}
+
+/* ============ 発想 ============ */
+function pool(k){const cat=CATS.find(c=>c.k===k);return cat.items.concat(state.custom[k]||[]);}
+function pick(k){const items=pool(k);const cur=state.idea.vals[k];let v=items[Math.floor(Math.random()*items.length)];if(items.length>1){let guard=0;while(v===cur&&guard++<10)v=items[Math.floor(Math.random()*items.length)];}return v;}
+function rerollAll(){CATS.forEach(c=>state.idea.vals[c.k]=pick(c.k));saveState();renderIdea();}
+function rerollUnlocked(){if(!document.getElementById("view-idea").classList.contains("active"))switchView("idea");let any=false;CATS.forEach(c=>{if(state.idea.locks[c.k])return;state.idea.vals[c.k]=pick(c.k);any=true;});saveState();renderIdea();if(!any)toast("全部🔒されてるよ！");}
+function rerollOne(k){state.idea.vals[k]=pick(k);saveState();renderIdea();}
+function toggleIdeaLock(k){state.idea.locks[k]=!state.idea.locks[k];saveState();renderIdea();}
+function ideaText(){return CATS.filter(c=>state.idea.vals[c.k]).map(c=>state.idea.vals[c.k]).join(" × ");}
+function renderIdea(){
+ document.getElementById("catList").innerHTML=CATS.map(c=>{const v=state.idea.vals[c.k];const lock=state.idea.locks[c.k];
+  return`<div class="cat-card"><div class="cat-top"><span class="cl">${c.l}</span>
+   <button class="addbtn" onclick="openAddModal('${c.k}')" aria-label="${c.l}に案を足す">＋</button>
+   <button class="lock ${lock?"on":""}" onclick="toggleIdeaLock('${c.k}')" aria-label="ロック切替">${lock?"🔒":"🔓"}</button></div>
+   <button class="cat-val" onclick="rerollOne('${c.k}')">${v?esc(v):'<span>タップで引く</span>'}</button></div>`;}).join("");
+ const t=ideaText();document.getElementById("ideaSentence").textContent=t||"まだ何も引いていないよ。🎲からどうぞ。";
+}
+function copyIdea(){copyText(ideaText(),"発想の組み合わせ");}
+function openSaveIdea(){const t=ideaText();if(!t){toast("まず🎲で引いてみて！");return;}openSaveModal("発想メモを保存",{name:"",memo:""},(nm,me)=>{state.ideas.unshift({id:uid(),name:nm||t.slice(0,14),memo:me,text:t,vals:Object.assign({},state.idea.vals)});saveState();renderBox();toast("発想を保存箱へ入れたよ");});}
+let addCb=null;
+function openAddGeneric(title,ph,cb){addCb=cb;document.getElementById("addModalTitle").textContent=title;const inp=document.getElementById("addValue");inp.value="";inp.placeholder=ph;document.getElementById("addModalWrap").classList.add("open");inp.focus();}
+function openAddModal(k){const c=CATS.find(x=>x.k===k);openAddGeneric(`「${c.l}」に案を足す`,"例：古い鍵",v=>{if(pool(k).includes(v)){toast("それ、もう棚にあるよ");return;}(state.custom[k]=state.custom[k]||[]).push(v);saveState();closeAddModal();renderIdea();toast(`「${v}」を足したよ`);});}
+function openAddTag(){openAddGeneric("自分のタグをつくる","例：そら、つきちゃん、推し色 など",v=>{const all=["すべて","自作"].concat(TAGS.slice(1)).concat(state.myTags);if(all.includes(v)){toast("そのタグ、もうあるよ");return;}state.myTags.push(v);const sel=new Set([...document.querySelectorAll("#peTags button.on")].map(b=>b.textContent));sel.add(v);saveState();renderPeTags(sel);renderTagChips();closeAddModal();toast(`タグ「${v}」をつくったよ`);});}
+function closeAddModal(){document.getElementById("addModalWrap").classList.remove("open");addCb=null;}
+document.getElementById("addModalOk").onclick=()=>{const v=document.getElementById("addValue").value.trim();if(!v){toast("空っぽは足せないよ！");return;}if(addCb)addCb(v);};
+
+/* ============ 保存箱 ============ */
+function renderBox(){
+ const pal=document.getElementById("boxPal");
+ pal.innerHTML=state.favs.length?state.favs.map(f=>`<div class="box-card">
+   <div class="bandmini">${f.pal.c.map(h=>`<i style="background:${h}"></i>`).join("")}</div>
+   <h4>${esc(f.name)}</h4><p class="memo">${esc(f.memo)||esc(f.pal.m)}</p>
+   <div class="box-actions"><button class="ghost small" onclick="favToLab('${f.id}')">🧪 実験室へ</button><button class="ghost small" onclick="editItem('favs','${f.id}')">✏ 名前とメモ</button><button class="danger small" onclick="delItem('favs','${f.id}')">削除</button></div></div>`).join(""):`<div class="empty">標本室の⭐から、好きな配色をここへ。</div>`;
+ const pl=document.getElementById("boxPlan");
+ pl.innerHTML=state.plans.length?state.plans.map(p=>`<div class="box-card">
+   <div class="bandmini">${SLOTS.map(s=>`<i style="background:${p.slots[s.k]||"#DDD"}"></i>`).join("")}</div>
+   <h4>${esc(p.name)}</h4><p class="memo">${esc(p.memo)}</p>
+   <div class="box-actions"><button class="ghost small" onclick="loadPlan('${p.id}')">読み込む</button><button class="ghost small" onclick="editItem('plans','${p.id}')">✏ 名前とメモ</button><button class="danger small" onclick="delItem('plans','${p.id}')">削除</button></div></div>`).join(""):`<div class="empty">実験室の⭐から、配色案をここへ。</div>`;
+ const id=document.getElementById("boxIdea");
+ id.innerHTML=state.ideas.length?state.ideas.map(x=>`<div class="box-card">
+   <h4>${esc(x.name)}</h4><p class="memo">${esc(x.text)}${x.memo?"\n"+esc(x.memo):""}</p>
+   <div class="box-actions"><button class="ghost small" onclick="loadIdea('${x.id}')">読み込む</button><button class="ghost small" onclick="copyIdeaById('${x.id}')">📋</button><button class="ghost small" onclick="editItem('ideas','${x.id}')">✏ 名前とメモ</button><button class="danger small" onclick="delItem('ideas','${x.id}')">削除</button></div></div>`).join(""):`<div class="empty">発想タブの⭐から、思いつきをここへ。</div>`;
+}
+function favToLab(id){const f=state.favs.find(x=>x.id===id);if(!f)return;const sk=applyPalette(f.pal.c);switchView("lab");toast(sk?`実験室に反映（🔒${sk}箇所はそのまま）`:"実験室に反映したよ");}
+function copyIdeaById(id){const x=state.ideas.find(i=>i.id===id);if(x)copyText(x.text,"発想");}
+function loadIdea(id){const x=state.ideas.find(i=>i.id===id);if(!x)return;state.idea.vals=Object.assign({},x.vals);saveState();renderIdea();switchView("idea");toast(`「${x.name}」を並べ直したよ`);}
+function editItem(kind,id){const item=state[kind].find(x=>x.id===id);if(!item)return;openSaveModal("名前とメモを直す",{name:item.name,memo:item.memo},(nm,me)=>{item.name=nm||item.name;item.memo=me;saveState();renderBox();renderLab();toast("直しておいたよ");});}
+function delItem(kind,id){if(!confirm("この標本を捨てる？戻せないよ。"))return;state[kind]=state[kind].filter(x=>x.id!==id);saveState();renderBox();renderLab();toast("そっと片づけたよ");}
+
+/* ============ 保存モーダル・設定 ============ */
+let saveCb=null;
+function openSaveModal(title,init,cb){saveCb=cb;document.getElementById("saveModalTitle").textContent=title;document.getElementById("saveName").value=init.name||"";document.getElementById("saveMemo").value=init.memo||"";document.getElementById("saveModalWrap").classList.add("open");}
+function closeSaveModal(){document.getElementById("saveModalWrap").classList.remove("open");saveCb=null;}
+document.getElementById("saveModalOk").onclick=()=>{if(!saveCb)return;const nm=document.getElementById("saveName").value.trim();const me=document.getElementById("saveMemo").value.trim();const cb=saveCb;closeSaveModal();cb(nm,me);};
+function openSettings(){renderMyTags();document.getElementById("settingsWrap").classList.add("open");}
+function closeSettings(){document.getElementById("settingsWrap").classList.remove("open");}
+function exportJSON(){const data=Object.assign({app:"いろどり標本室",version:1,exportedAt:new Date().toISOString()},state);const blob=new Blob([JSON.stringify(data,null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);const d=new Date();a.download=`いろどり標本室_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);toast("JSONを書き出したよ");}
+function importJSON(ev){const file=ev.target.files&&ev.target.files[0];ev.target.value="";if(!file)return;const fr=new FileReader();fr.onload=()=>{try{const s=JSON.parse(fr.result);if(!s||typeof s!=="object"||(!Array.isArray(s.favs)&&!s.lab))throw 0;if(!confirm("今の内容をこのバックアップで置き換える？"))return;const base=defaultState();state=Object.assign(base,s);state.lab=Object.assign(defaultState().lab,s.lab||{});state.idea=Object.assign(defaultState().idea,s.idea||{});saveState();renderAll();closeSettings();toast("バックアップから復元したよ");}catch(e){toast("このファイルは読めなかった…書き出したJSONを選んでね");}};fr.readAsText(file);}
+function wipeAll(){if(!confirm("本当に全部消す？保存箱も追加した案も消えるよ。"))return;state=defaultState();saveState();renderAll();closeSettings();toast("まっさらな標本室に戻したよ");}
+
+/* ============ 起動 ============ */
+function renderAll(){document.querySelectorAll("#modeChips button").forEach(b=>b.classList.toggle("active",b.dataset.m===state.mode));renderTagChips();renderPalettes();renderLab();renderIdea();renderBox();}
+loadState();
+if(noStore)document.getElementById("storageBanner").classList.add("show");
+renderAll();
+</script>
+</body>
+</html>
