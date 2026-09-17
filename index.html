@@ -164,7 +164,7 @@ main{padding:15px 13px calc(96px + env(safe-area-inset-bottom))}
   <main>
 
     <section class="view active" id="view-spec">
-      <div class="head"><div><h2>🗂 配色標本室</h2><p>雰囲気で選ぶ、役割つきの配色棚。</p></div><button class="primary small" onclick="openPalEditor(null)">＋ 自作標本</button></div>
+      <div class="head"><div><h2>🗂️ 配色標本室</h2><p>雰囲気で選ぶ、役割つきの配色棚。</p></div><button class="primary small" onclick="openPalEditor(null)">＋ 自作標本</button></div>
       <div class="chips" id="modeChips">
         <button data-m="hex" class="active" onclick="setMode('hex')">HEX</button>
         <button data-m="rgb" onclick="setMode('rgb')">RGB</button>
@@ -198,7 +198,7 @@ main{padding:15px 13px calc(96px + env(safe-area-inset-bottom))}
         <div class="ref-thumbs" id="refThumbs"></div>
         <div class="refimg" id="refBox">まだ画像はないよ</div>
         <div class="ext-row" id="extRow"></div>
-        <div class="actions" id="extActions" style="display:none;margin-top:9px"><button class="primary" onclick="saveExtPalette()">🗂 抽出色から自作標本をつくる</button></div>
+        <div class="actions" id="extActions" style="display:none;margin-top:9px"><button class="primary" onclick="saveExtPalette()">🗂️ 抽出色から自作標本をつくる</button></div>
         <p class="note" id="extHint" style="display:none;margin-top:6px">抽出色をタップ → 基準の部位に入るよ（🔒中の部位ならコピーになる）。</p>
       </div>
       <div class="panelbox">
@@ -228,7 +228,7 @@ main{padding:15px 13px calc(96px + env(safe-area-inset-bottom))}
 
   </main>
   <nav class="tabbar">
-    <button id="tab-spec" class="active" onclick="switchView('spec')"><b>🗂</b>標本</button>
+    <button id="tab-spec" class="active" onclick="switchView('spec')"><b>🗂️</b>標本</button>
     <button id="tab-lab" onclick="switchView('lab')"><b>🧪</b>実験</button>
     <button id="tab-idea" onclick="switchView('idea')"><b>💡</b>発想</button>
     <button id="tab-box" onclick="switchView('box')"><b>📦</b>保存箱</button>
@@ -274,8 +274,8 @@ main{padding:15px 13px calc(96px + env(safe-area-inset-bottom))}
   <div class="modal">
     <div class="handle"></div>
     <h2>保存とバックアップ</h2>
-    <div class="msec"><h3>書き出し</h3><p>保存箱・実験室・追加した案を、まるごとJSONに。</p><button class="primary wide" onclick="exportJSON()">⬇ JSONを書き出す</button></div>
-    <div class="msec"><h3>読み込み</h3><p>書き出したJSONから復元する。今の内容は置き換わるよ。</p><input type="file" id="importInput" accept="application/json,.json" hidden onchange="importJSON(event)"><button class="ghost wide" onclick="document.getElementById('importInput').click()">⬆ JSONを読み込む</button></div>
+    <div class="msec"><h3>書き出し</h3><p>保存箱・実験室・追加した案を、まるごとJSONに。</p><button class="primary wide" onclick="exportJSON()">⬇️ JSONを書き出す</button></div>
+    <div class="msec"><h3>読み込み</h3><p>書き出したJSONから復元する。今の内容は置き換わるよ。</p><input type="file" id="importInput" accept="application/json,.json" hidden onchange="importJSON(event)"><button class="ghost wide" onclick="document.getElementById('importInput').click()">⬆️ JSONを読み込む</button></div>
     <div class="msec"><h3>自分のタグ</h3><p>タップで削除。タグの追加は自作標本エディタの「＋ タグ」からできるよ。</p><div class="tagpick" id="myTagList"></div></div>
     <div class="msec"><h3>ぜんぶ消す</h3><p>この端末の保存内容を初期状態に戻す。戻せないから慎重にね。</p><button class="danger wide" onclick="wipeAll()">🗑 初期化する</button></div>
     <div class="actions"><button class="ghost wide" onclick="closeSettings()">閉じる</button></div>
@@ -428,7 +428,7 @@ function paletteCard(o){
  const key=o.kind==="mine"?`'mine','${p.id}'`:`'off',${o.i}`;
  const cp=`<button class="pal-btn" onclick="copyPal(${key},'ja')">📋 全色</button><button class="pal-btn" onclick="copyPal(${key},'en')">📋 EN</button>`;
  const btns=o.kind==="mine"
-  ?cp+`<button class="pal-btn" onclick="openPalEditor('${p.id}')">✏ 編集</button><button class="pal-btn" onclick="delMyPalette('${p.id}')">🗑</button><button class="pal-btn" onclick="myPaletteToLab('${p.id}')">🧪 実験室へ</button>`
+  ?cp+`<button class="pal-btn" onclick="openPalEditor('${p.id}')">✏️ 編集</button><button class="pal-btn" onclick="delMyPalette('${p.id}')">🗑</button><button class="pal-btn" onclick="myPaletteToLab('${p.id}')">🧪 実験室へ</button>`
   :cp+`<button class="pal-btn" onclick="favPalette(${o.i})">⭐ 保存</button><button class="pal-btn" onclick="paletteToLab(${o.i})">🧪 実験室へ</button>`;
  return`<article class="pal" style="background:${bgC};color:${txC};border-color:${txC}33">
   <span class="pin" aria-hidden="true"></span>
@@ -446,7 +446,7 @@ function renderPalettes(){
  if(state.tag==="自作")list=mine;
  else if(state.tag!=="すべて")list=list.filter(o=>o.p.t.includes(state.tag));
  let today="";
- if(state.tag==="すべて"){const d=new Date();const ti=(d.getFullYear()*372+d.getMonth()*31+d.getDate())%PALETTES.length;today=`<p class="today-label">☀ 今日の標本</p>`+paletteCard({p:PALETTES[ti],i:ti,kind:"off"})+`<p class="today-label" style="color:var(--soft)">🗂 ぜんぶの棚</p>`;}
+ if(state.tag==="すべて"){const d=new Date();const ti=(d.getFullYear()*372+d.getMonth()*31+d.getDate())%PALETTES.length;today=`<p class="today-label">☀️ 今日の標本</p>`+paletteCard({p:PALETTES[ti],i:ti,kind:"off"})+`<p class="today-label" style="color:var(--soft)">🗂️ ぜんぶの棚</p>`;}
  document.getElementById("palList").innerHTML=today+(list.length?list.map(o=>paletteCard(o)).join(""):`<div class="empty">このタグの標本はまだ棚に無いみたい。${state.tag==="自作"?"「＋ 自作標本」から最初のひとつをどうぞ。":""}</div>`);
 }
 function favPalette(idx){const p=PALETTES[idx];openSaveModal("パレットを保存箱へ",{name:p.n,memo:""},(nm,me)=>{state.favs.unshift({id:uid(),name:nm||p.n,memo:me,pal:{n:p.n,m:p.m,c:p.c.slice()}});saveState();renderBox();toast("保存箱にしまったよ");});}
@@ -601,16 +601,16 @@ function renderBox(){
  pal.innerHTML=state.favs.length?state.favs.map(f=>`<div class="box-card">
    <div class="bandmini">${f.pal.c.map(h=>`<i style="background:${h}"></i>`).join("")}</div>
    <h4>${esc(f.name)}</h4><p class="memo">${esc(f.memo)||esc(f.pal.m)}</p>
-   <div class="box-actions"><button class="ghost small" onclick="favToLab('${f.id}')">🧪 実験室へ</button><button class="ghost small" onclick="editItem('favs','${f.id}')">✏ 名前とメモ</button><button class="danger small" onclick="delItem('favs','${f.id}')">削除</button></div></div>`).join(""):`<div class="empty">標本室の⭐から、好きな配色をここへ。</div>`;
+   <div class="box-actions"><button class="ghost small" onclick="favToLab('${f.id}')">🧪 実験室へ</button><button class="ghost small" onclick="editItem('favs','${f.id}')">✏️ 名前とメモ</button><button class="danger small" onclick="delItem('favs','${f.id}')">削除</button></div></div>`).join(""):`<div class="empty">標本室の⭐から、好きな配色をここへ。</div>`;
  const pl=document.getElementById("boxPlan");
  pl.innerHTML=state.plans.length?state.plans.map(p=>`<div class="box-card">
    <div class="bandmini">${SLOTS.map(s=>`<i style="background:${p.slots[s.k]||"#DDD"}"></i>`).join("")}</div>
    <h4>${esc(p.name)}</h4><p class="memo">${esc(p.memo)}</p>
-   <div class="box-actions"><button class="ghost small" onclick="loadPlan('${p.id}')">読み込む</button><button class="ghost small" onclick="editItem('plans','${p.id}')">✏ 名前とメモ</button><button class="danger small" onclick="delItem('plans','${p.id}')">削除</button></div></div>`).join(""):`<div class="empty">実験室の⭐から、配色案をここへ。</div>`;
+   <div class="box-actions"><button class="ghost small" onclick="loadPlan('${p.id}')">読み込む</button><button class="ghost small" onclick="editItem('plans','${p.id}')">✏️ 名前とメモ</button><button class="danger small" onclick="delItem('plans','${p.id}')">削除</button></div></div>`).join(""):`<div class="empty">実験室の⭐から、配色案をここへ。</div>`;
  const id=document.getElementById("boxIdea");
  id.innerHTML=state.ideas.length?state.ideas.map(x=>`<div class="box-card">
    <h4>${esc(x.name)}</h4><p class="memo">${esc(x.text)}${x.memo?"\n"+esc(x.memo):""}</p>
-   <div class="box-actions"><button class="ghost small" onclick="loadIdea('${x.id}')">読み込む</button><button class="ghost small" onclick="copyIdeaById('${x.id}')">📋</button><button class="ghost small" onclick="editItem('ideas','${x.id}')">✏ 名前とメモ</button><button class="danger small" onclick="delItem('ideas','${x.id}')">削除</button></div></div>`).join(""):`<div class="empty">発想タブの⭐から、思いつきをここへ。</div>`;
+   <div class="box-actions"><button class="ghost small" onclick="loadIdea('${x.id}')">読み込む</button><button class="ghost small" onclick="copyIdeaById('${x.id}')">📋</button><button class="ghost small" onclick="editItem('ideas','${x.id}')">✏️ 名前とメモ</button><button class="danger small" onclick="delItem('ideas','${x.id}')">削除</button></div></div>`).join(""):`<div class="empty">発想タブの⭐から、思いつきをここへ。</div>`;
 }
 function favToLab(id){const f=state.favs.find(x=>x.id===id);if(!f)return;const sk=applyPalette(f.pal.c);switchView("lab");toast(sk?`実験室に反映（🔒${sk}箇所はそのまま）`:"実験室に反映したよ");}
 function copyIdeaById(id){const x=state.ideas.find(i=>i.id===id);if(x)copyText(x.text,"発想");}
